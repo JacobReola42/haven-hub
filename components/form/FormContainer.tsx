@@ -16,10 +16,8 @@ const initialState = {
   - `children`: React nodes that will be rendered inside the form.
   This component is used in app/profile/create/page.tsx to handle form submissions.
 */
-function FormContainer({
-  action,
-  children,
-}: {
+function FormContainer({action,children,}:
+{
   action: actionFunction;
   children: React.ReactNode;
 }) {
