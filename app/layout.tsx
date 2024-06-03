@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <body className={inter.className}>
           <Providers>
             <Navbar />
@@ -33,3 +33,30 @@ export default function RootLayout({
     </ClerkProvider>
   );
 }
+
+// suppress hydration warning got rid of error on Zod build
+
+// Warning: Extra attributes from the server: class,style
+// html
+// SWRConfig
+// OrganizationProvider
+// ClerkContextProvider
+// ClerkProviderBase
+// ClerkProvider
+// ClerkNextOptionsProvider
+// ClientClerkProvider
+// ClerkProvider (Server)
+// RootLayout (Server)
+// Component@
+// RedirectBoundary
+// Component@
+// NotFoundBoundary
+// DevRootNotFoundBoundary
+// PureComponent@
+// HotReload
+// Router
+// Component@
+// ErrorBoundary
+// AppRouter
+// ServerRoot
+// Root
