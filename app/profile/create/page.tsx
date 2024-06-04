@@ -2,6 +2,8 @@ import FormInput from '@/components/form/FormInput';
 import { SubmitButton } from '@/components/form/Buttons';
 import FormContainer from '@/components/form/FormContainer';
 import { createProfileAction } from '@/utils/actions';
+import { currentUser } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 
 
 /* moved to utils/actions.ts */
@@ -13,7 +15,14 @@ import { createProfileAction } from '@/utils/actions';
 //   return { message: 'Profile Created' };
 // };
 
-function CreateProfile() {
+
+
+async function CreateProfilePage() {
+
+  /* if the user has a profile, profile/create will redirect home */
+  const user = await currentUser()
+  if(user?.privateMetadata?.hasProfile) redirect('/')
+
   return (
     <section>
       <h1 className='text-2xl font-semibold mb-8 capitalize'>new user</h1>
@@ -32,7 +41,7 @@ function CreateProfile() {
     </section>
   );
 }
-export default CreateProfile;
+export default CreateProfilePage;
 
 
 
