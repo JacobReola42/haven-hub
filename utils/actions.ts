@@ -13,6 +13,7 @@ import db from './db';
 import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { profileSchema } from './schemas';
 
 export const createProfileAction = async (
   prevState: any,
@@ -39,7 +40,7 @@ export const createProfileAction = async (
         hasProfile: true,
       },
     });
-    
+
   } catch (error) {
     return {
       message: error instanceof Error ? error.message : 'An error occurred',
