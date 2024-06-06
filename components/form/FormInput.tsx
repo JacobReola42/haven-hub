@@ -18,7 +18,7 @@ function FormInput({
     placeholder,
 }: FormInputProps) {
     return (
-        <div className='mb-2'>
+        <div className='mb-'>
             {/* dynamic label and input because {}  */}
             <Label htmlFor={name} className='capitalize'>
                 {label || name}
