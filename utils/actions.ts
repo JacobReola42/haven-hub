@@ -1,5 +1,11 @@
 'use server';
 
+import db from './db';
+import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { profileSchema } from './schemas';
+
 /*
 
 HELPERS
@@ -19,11 +25,15 @@ const getAuthUser = async () => {
   return user;
 };
 
-import db from './db';
-import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { profileSchema } from './schemas';
+
+const renderError = (error: unknown): { message: string } => {
+  console.log(error);
+  return {
+    message: error instanceof Error ? error.message : 'An error occurred',
+  };
+};
+
+
 
 export const createProfileAction = async (
   prevState: any,
@@ -52,9 +62,11 @@ export const createProfileAction = async (
     });
 
   } catch (error) {
-    return {
-      message: error instanceof Error ? error.message : 'An error occurred',
-    };
+      // return {
+      // message: error instanceof Error ? error.message : 'An error occurred',
+      // }
+    renderError(error);
+
   }
   redirect('/');
 };
@@ -88,7 +100,27 @@ export const fetchProfile = async () => {
 };
 
 
-export const updateProfileAction = async(prevState: any, formData:FormData):
-  Promise<{message:string}> => { 
-  return {message: 'update profile action'}
-}
+export const updateProfileAction = async (
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> => {
+  const user = await getAuthUser();
+  try {
+    const rawData = Object.fromEntries(formData);
+
+    const validatedFields = profileSchema.parse(rawData);
+
+    await db.profile.update({
+      where: {
+        clerkId: user.id,
+      },
+      data: validatedFields,
+    });
+    revalidatePath('/profile'); 
+    return { message: 'Profile updated successfully' };
+  } catch (error) {
+    return {
+      message: error instanceof Error ? error.message : 'An error occurred',
+    };
+  }
+};
