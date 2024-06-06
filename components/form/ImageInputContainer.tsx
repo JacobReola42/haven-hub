@@ -40,6 +40,7 @@ function ImageInputContainer(props: ImageInputContainerProps) {
       <Button
         variant='outline'
         size='sm'
+        /* effectively just toggling */
         onClick={() => setUpdateFormVisible((prev) => !prev)}
       >
         {text}
