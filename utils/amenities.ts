@@ -1,6 +1,7 @@
 /* can choose beween amenities and conservative ameneties to display */
 
 import { IconType } from 'react-icons';
+
 export type Amenity = {
   name: string;
   icon: IconType;
