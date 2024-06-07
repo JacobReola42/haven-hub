@@ -7,6 +7,7 @@ export type Amenity = {
   icon: IconType;
   selected: boolean;
 };
+
 import {
   FiCloud,
   FiTruck,
