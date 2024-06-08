@@ -6,7 +6,7 @@ function HomePage({
 }: {
   searchParams: { category?: string; search?: string };
 }) {
-  // console.log(searchParams);
+  console.log(searchParams);
 
   return (
     <section>
