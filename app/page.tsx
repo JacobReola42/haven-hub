@@ -25,4 +25,7 @@ function HomePage({
 }
 export default HomePage;
 
-/* don't fetch on the page, follow complicated design of passing down props 103 */
+/* don't fetch on the page, follow complicated design of passing down props 103 & 104 git. 
+   page grab searchParams > pass down to propertiesContainer we have fetch properties, pass in categories 
+   and search and then in actions fetch properties search and catergory.
+*/
