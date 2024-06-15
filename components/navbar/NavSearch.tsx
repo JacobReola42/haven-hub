@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 
 function NavSearch() {
   const searchParams = useSearchParams();
-  const pathname = usePathname();
+  // const pathname = usePathname();  // commented out because would not work in favorite tab search.
   const { replace } = useRouter();
   const [search, setSearch] = useState(
     searchParams.get('search')?.toString() || ''
@@ -19,7 +19,9 @@ function NavSearch() {
     } else {
       params.delete('search');
     }
-    replace(`${pathname}?${params.toString()}`);
+    // replace(`${pathname}?${params.toString()}`);
+    replace(`/?${params.toString()}`);
+
   }, 300);
 
   useEffect(() => {
