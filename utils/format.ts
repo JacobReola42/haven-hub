@@ -7,3 +7,8 @@ export const formatCurrency = (amount: number | null) => {
       maximumFractionDigits: 0,
     }).format(value);
   };
+
+  // This function formats the quantity of items and returns a string with the correct singular or plural noun.
+  export function formatQuantity(quantity: number, noun: string): string {
+    return quantity === 1 ? `${quantity} ${noun}` : `${quantity} ${noun}s`;
+  }

@@ -11,6 +11,7 @@ export default function App() {
     from: undefined,
     to: undefined,
   };
+  
   const [range, setRange] = useState<DateRange | undefined>(defaultSelected);
 
   return (
