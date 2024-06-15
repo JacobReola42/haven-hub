@@ -12,11 +12,13 @@ function Amenities({ amenities }: { amenities: string }) {
   return (
     <div className='mt-4'>
       <Title text='What this place offers' />
+
       <div className='grid md:grid-cols-2 gap-x-4'>
         {amenitiesList.map((amenity) => {
           if (!amenity.selected) {
             return null;
           }
+
           return (
             <div key={amenity.name} className='flex items-center gap-x-4 mb-2 '>
               <LuFolderCheck className='h-6 w-6 text-primary' />
@@ -25,8 +27,10 @@ function Amenities({ amenities }: { amenities: string }) {
               </span>
             </div>
           );
+          
         })}
       </div>
+
     </div>
   );
 }
