@@ -20,7 +20,7 @@ function NavSearch() {
       params.delete('search');
     }
     // replace(`${pathname}?${params.toString()}`);
-    replace(`/?${params.toString()}`);
+    replace(`/?${params.toString()}`);  // technically for vercel.
 
   }, 300);
 
