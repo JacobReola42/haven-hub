@@ -3,9 +3,9 @@ import { ZodSchema } from 'zod';
 
 export const profileSchema = z.object({
   // firstName: z.string().max(5, { message: 'max length is 5' }),
-  firstName: z.string().min(2, {message: ' first name must be at least 2 characters'}),
-  lastName: z.string().min(2, {message: ' last name must be at least 2 characters'}),
-  username: z.string().min(2, {message: ' user name must be at least 2 characters'}),
+  firstName: z.string().min(2, { message: ' first name must be at least 2 characters' }),
+  lastName: z.string().min(2, { message: ' last name must be at least 2 characters' }),
+  username: z.string().min(2, { message: ' user name must be at least 2 characters' }),
 });
 
 export function validateWithZodSchema<T>(
@@ -85,4 +85,10 @@ export const propertySchema = z.object({
     message: 'bahts amount must be a positive number.',
   }),
   amenities: z.string(),
+});
+
+export const createReviewSchema = z.object({
+  propertyId: z.string(),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().min(10).max(1000),
 });
