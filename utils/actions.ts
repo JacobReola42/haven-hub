@@ -12,6 +12,8 @@ import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { uploadImage } from './supabase';
+import { calculateTotals } from './calculateTotals';
+
 
 
 /*
@@ -317,6 +319,18 @@ export const fetchFavorites = async () => {
 };
 
 
+// export const fetchPropertyDetails = (id: string) => {
+//   return db.property.findUnique({
+//     where: {
+//       id,
+//     },
+//     include: {
+//       profile: true,
+//     },
+//   });
+// };
+
+/* includes bookings */
 export const fetchPropertyDetails = (id: string) => {
   return db.property.findUnique({
     where: {
@@ -324,6 +338,12 @@ export const fetchPropertyDetails = (id: string) => {
     },
     include: {
       profile: true,
+      bookings: {
+        select: {
+          checkIn: true,
+          checkOut: true,
+        },
+      },
     },
   });
 };
@@ -432,6 +452,85 @@ export async function fetchPropertyRating(propertyId: string) {
 }
 
 
+export const createBookingAction = async (prevState: {
+  propertyId: string;
+  checkIn: Date;
+  checkOut: Date;
+}) => {
+  const user = await getAuthUser();
+
+  const { propertyId, checkIn, checkOut } = prevState;
+  const property = await db.property.findUnique({
+    where: { id: propertyId },
+    select: { price: true },
+  });
+  if (!property) {
+    return { message: 'Property not found' };
+  }
+  const { orderTotal, totalNights } = calculateTotals({
+    checkIn,
+    checkOut,
+    price: property.price,
+  });
+
+  try {
+    const booking = await db.booking.create({
+      data: {
+        checkIn,
+        checkOut,
+        orderTotal,
+        totalNights,
+        profileId: user.id,
+        propertyId,
+      },
+    });
+  } catch (error) {
+    return renderError(error);
+  }
+  redirect('/bookings');
+};
+
+export const fetchBookings = async () => {
+  const user = await getAuthUser();
+  const bookings = await db.booking.findMany({
+    where: {
+      profileId: user.id,
+    },
+    include: {
+      property: {
+        select: {
+          id: true,
+          name: true,
+          country: true,
+        },
+      },
+    },
+    orderBy: {
+      checkIn: 'desc',
+    },
+  });
+  return bookings;
+};
+
+export async function deleteBookingAction(prevState: { bookingId: string }) {
+  const { bookingId } = prevState;
+  const user = await getAuthUser();
+
+  try {
+    const result = await db.booking.delete({
+      where: {
+        id: bookingId,
+        profileId: user.id,
+      },
+    });
+
+    revalidatePath('/bookings');
+    return { message: 'Booking deleted successfully' };
+  } catch (error) {
+    return renderError(error);
+  }
+}
+
 export const findExistingReview = async (
   userId: string,
   propertyId: string
@@ -443,3 +542,4 @@ export const findExistingReview = async (
     },
   });
 };
+
