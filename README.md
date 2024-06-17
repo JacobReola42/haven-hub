@@ -21,6 +21,7 @@ The "Haven Hub" is a sophisticated Next.js application designed for comprehensiv
 - Clerk (for authentication)
 - Supabase (for backend services)
 - Recharts (for data visualization)
+- Zod (for data validation)
 
 ## Full-Stack Development and Scalability
 The "Haven Hub" Next.js application exemplifies full-stack development and scalability, incorporating a variety of technologies and features:
@@ -30,6 +31,7 @@ The "Haven Hub" Next.js application exemplifies full-stack development and scala
 - **Backend:** Utilizes Prisma for database management, Clerk for authentication, and Supabase for additional backend services.
 - **Payment Processing:** Integrates Stripe for secure payment transactions.
 - **Data Visualization:** Implements Recharts for visualizing data through charts and graphs.
+- **Data Validation:** Employs Zod to ensure robust data validation across the application.
 
 ### 2. Scalability:
 - **Architecture:** Crafted with Next.js for server-side rendering, optimizing performance and ensuring scalability as user demand grows.
