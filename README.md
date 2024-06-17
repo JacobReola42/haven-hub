@@ -14,6 +14,7 @@ The "Haven Hub" is a sophisticated Next.js application designed for comprehensiv
 ## Technologies Used
 - Next.js
 - React
+- Shadcn
 - Tailwind CSS
 - Stripe (for payment processing)
 - Prisma (for database management)
