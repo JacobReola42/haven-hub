@@ -38,4 +38,18 @@ The "Haven Hub" Next.js application exemplifies full-stack development and scala
 
 Overall, the "Haven Hub" application demonstrates a commitment to full-stack development with a focus on scalability, leveraging cutting-edge technologies and best practices in frontend, backend, and database management.
 
+Lastly, if you need assistance with getting the code running, feel free to reach out.
+
+## Environment Variables
+
+To run this application, you need to set up the following environment variables in your `.env` file:
+- `DB_PASSWORD`
+- `DATABASE_URL`
+- `DIRECT_URL`
+- `SUPABASE_URL`
+- `SUPABASE_KEY`
+- `ADMIN_USER_ID`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+
 Credit for this repository goes to Coding Addict.
