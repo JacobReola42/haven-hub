@@ -37,3 +37,5 @@ The "Haven Hub" Next.js application exemplifies full-stack development and scala
 - **Payment Processing:** Stripe integration ensures secure and scalable payment processing capabilities.
 
 Overall, the "Haven Hub" application demonstrates a commitment to full-stack development with a focus on scalability, leveraging cutting-edge technologies and best practices in frontend, backend, and database management.
+
+Credit for this repository goes to Coding Addict.
