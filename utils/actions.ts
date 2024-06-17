@@ -3,8 +3,8 @@
 import {
   imageSchema,
   profileSchema,
-  validateWithZodSchema,
   propertySchema,
+  validateWithZodSchema,
   createReviewSchema,
 } from './schemas';
 import db from './db';
@@ -13,19 +13,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { uploadImage } from './supabase';
 import { calculateTotals } from './calculateTotals';
-
-
-
-/*
-
-HELPERS
-auth: asynchronous to get user id. SERVER
-clerkClient: metadata in clerk.
-currentUser: get more info about user. needs await in async. SERVER
-
-*/
-
-/* helper fn */
+import { formatDate } from './format';
 const getAuthUser = async () => {
   const user = await currentUser();
   if (!user) {
@@ -35,6 +23,11 @@ const getAuthUser = async () => {
   return user;
 };
 
+const getAdminUser = async () => {
+  const user = await getAuthUser();
+  if (user.id !== process.env.ADMIN_USER_ID) redirect('/');
+  return user;
+};
 
 const renderError = (error: unknown): { message: string } => {
   console.log(error);
@@ -42,8 +35,6 @@ const renderError = (error: unknown): { message: string } => {
     message: error instanceof Error ? error.message : 'An error occurred',
   };
 };
-
-
 
 export const createProfileAction = async (
   prevState: any,
@@ -54,7 +45,6 @@ export const createProfileAction = async (
     if (!user) throw new Error('Please login to create a profile');
 
     const rawData = Object.fromEntries(formData);
-    // const validatedFields = profileSchema.parse(rawData);
     const validatedFields = validateWithZodSchema(profileSchema, rawData);
 
     await db.profile.create({
@@ -65,23 +55,16 @@ export const createProfileAction = async (
         ...validatedFields,
       },
     });
-
     await clerkClient.users.updateUserMetadata(user.id, {
       privateMetadata: {
         hasProfile: true,
       },
     });
-
   } catch (error) {
-      // return {
-      // message: error instanceof Error ? error.message : 'An error occurred',
-      // }
-    renderError(error);
-
+    return renderError(error);
   }
   redirect('/');
 };
-
 
 export const fetchProfileImage = async () => {
   const user = await currentUser();
@@ -95,11 +78,11 @@ export const fetchProfileImage = async () => {
       profileImage: true,
     },
   });
+
   return profile?.profileImage;
 };
 
 export const fetchProfile = async () => {
-  /* helper fn */
   const user = await getAuthUser();
   const profile = await db.profile.findUnique({
     where: {
@@ -110,42 +93,29 @@ export const fetchProfile = async () => {
   return profile;
 };
 
-
 export const updateProfileAction = async (
   prevState: any,
   formData: FormData
 ): Promise<{ message: string }> => {
   const user = await getAuthUser();
+
   try {
     const rawData = Object.fromEntries(formData);
     const validatedFields = validateWithZodSchema(profileSchema, rawData);
-
-    // const validatedFields = profileSchema.parse(rawData);
-    // const validatedFields = profileSchema.safeParse(rawData)
-    // console.log(validatedFields);
-
-    // if(!validatedFields.success) {
-    //   const errors = validatedFields.error.errors.map((error) => error.message);
-    //   throw new Error(errors.join(','));
-    // }
-
 
     await db.profile.update({
       where: {
         clerkId: user.id,
       },
-      // data: validatedFields.data,
       data: validatedFields,
     });
-    revalidatePath('/profile'); 
+
+    revalidatePath('/profile');
     return { message: 'Profile updated successfully' };
   } catch (error) {
-    return {
-      message: error instanceof Error ? error.message : 'An error occurred',
-    };
+    return renderError(error);
   }
 };
-
 
 export const updateProfileImageAction = async (
   prevState: any,
@@ -172,21 +142,6 @@ export const updateProfileImageAction = async (
   }
 };
 
-// export const createPropertyAction = async (
-//   prevState: any,
-//   formData: FormData
-// ): Promise<{ message: string }> => {
-//   // const user = await getAuthUser();
-//   try {
-//     const rawData = Object.fromEntries(formData);
-//     const validatedFields = validateWithZodSchema(propertySchema, rawData);
-//     return { message: 'propery created'}
-//   } catch (error) {
-//     return renderError(error);
-//   }
-//   // redirect('/');
-// };
-
 export const createPropertyAction = async (
   prevState: any,
   formData: FormData
@@ -195,6 +150,7 @@ export const createPropertyAction = async (
   try {
     const rawData = Object.fromEntries(formData);
     const file = formData.get('image') as File;
+    console.log(rawData);
 
     const validatedFields = validateWithZodSchema(propertySchema, rawData);
     const validatedFile = validateWithZodSchema(imageSchema, { image: file });
@@ -212,7 +168,6 @@ export const createPropertyAction = async (
   }
   redirect('/');
 };
-
 
 export const fetchProperties = async ({
   search = '',
@@ -234,8 +189,8 @@ export const fetchProperties = async ({
       name: true,
       tagline: true,
       country: true,
-      image: true,
       price: true,
+      image: true,
     },
     orderBy: {
       createdAt: 'desc',
@@ -243,7 +198,6 @@ export const fetchProperties = async ({
   });
   return properties;
 };
-
 
 export const fetchFavoriteId = async ({
   propertyId,
@@ -269,11 +223,7 @@ export const toggleFavoriteAction = async (prevState: {
   pathname: string;
 }) => {
   const user = await getAuthUser();
-
-  // pathname is needed because it'll be rendered in multiple places.
   const { propertyId, favoriteId, pathname } = prevState;
-  console.log(propertyId, favoriteId, pathname);
-
   try {
     if (favoriteId) {
       await db.favorite.delete({
@@ -308,8 +258,8 @@ export const fetchFavorites = async () => {
           id: true,
           name: true,
           tagline: true,
-          price: true,
           country: true,
+          price: true,
           image: true,
         },
       },
@@ -318,19 +268,6 @@ export const fetchFavorites = async () => {
   return favorites.map((favorite) => favorite.property);
 };
 
-
-// export const fetchPropertyDetails = (id: string) => {
-//   return db.property.findUnique({
-//     where: {
-//       id,
-//     },
-//     include: {
-//       profile: true,
-//     },
-//   });
-// };
-
-/* includes bookings */
 export const fetchPropertyDetails = (id: string) => {
   return db.property.findUnique({
     where: {
@@ -354,6 +291,7 @@ export async function createReviewAction(prevState: any, formData: FormData) {
     const rawData = Object.fromEntries(formData);
 
     const validatedFields = validateWithZodSchema(createReviewSchema, rawData);
+
     await db.review.create({
       data: {
         ...validatedFields,
@@ -430,6 +368,18 @@ export const deleteReviewAction = async (prevState: { reviewId: string }) => {
   }
 };
 
+export const findExistingReview = async (
+  userId: string,
+  propertyId: string
+) => {
+  return db.review.findFirst({
+    where: {
+      profileId: userId,
+      propertyId: propertyId,
+    },
+  });
+};
+
 export async function fetchPropertyRating(propertyId: string) {
   const result = await db.review.groupBy({
     by: ['propertyId'],
@@ -451,13 +401,19 @@ export async function fetchPropertyRating(propertyId: string) {
   };
 }
 
-
 export const createBookingAction = async (prevState: {
   propertyId: string;
   checkIn: Date;
   checkOut: Date;
 }) => {
   const user = await getAuthUser();
+  await db.booking.deleteMany({
+    where: {
+      profileId: user.id,
+      paymentStatus: false,
+    },
+  });
+  let bookingId: null | string = null;
 
   const { propertyId, checkIn, checkOut } = prevState;
   const property = await db.property.findUnique({
@@ -484,10 +440,11 @@ export const createBookingAction = async (prevState: {
         propertyId,
       },
     });
+    bookingId = booking.id;
   } catch (error) {
     return renderError(error);
   }
-  redirect('/bookings');
+  redirect(`/checkout?bookingId=${bookingId}`);
 };
 
 export const fetchBookings = async () => {
@@ -495,6 +452,7 @@ export const fetchBookings = async () => {
   const bookings = await db.booking.findMany({
     where: {
       profileId: user.id,
+      paymentStatus: true,
     },
     include: {
       property: {
@@ -505,6 +463,7 @@ export const fetchBookings = async () => {
         },
       },
     },
+
     orderBy: {
       checkIn: 'desc',
     },
@@ -531,18 +490,6 @@ export async function deleteBookingAction(prevState: { bookingId: string }) {
   }
 }
 
-export const findExistingReview = async (
-  userId: string,
-  propertyId: string
-) => {
-  return db.review.findFirst({
-    where: {
-      profileId: userId,
-      propertyId: propertyId,
-    },
-  });
-};
-
 export const fetchRentals = async () => {
   const user = await getAuthUser();
   const rentals = await db.property.findMany({
@@ -561,6 +508,7 @@ export const fetchRentals = async () => {
       const totalNightsSum = await db.booking.aggregate({
         where: {
           propertyId: rental.id,
+          paymentStatus: true,
         },
         _sum: {
           totalNights: true,
@@ -570,6 +518,7 @@ export const fetchRentals = async () => {
       const orderTotalSum = await db.booking.aggregate({
         where: {
           propertyId: rental.id,
+          paymentStatus: true,
         },
         _sum: {
           orderTotal: true,
@@ -605,7 +554,6 @@ export async function deleteRentalAction(prevState: { propertyId: string }) {
     return renderError(error);
   }
 }
-
 
 export const fetchRentalDetails = async (propertyId: string) => {
   const user = await getAuthUser();
@@ -645,7 +593,6 @@ export const updatePropertyAction = async (
   }
 };
 
-
 export const updatePropertyImageAction = async (
   prevState: any,
   formData: FormData
@@ -674,7 +621,6 @@ export const updatePropertyImageAction = async (
   }
 };
 
-
 export const fetchReservations = async () => {
   const user = await getAuthUser();
 
@@ -702,6 +648,53 @@ export const fetchReservations = async () => {
   return reservations;
 };
 
+export const fetchStats = async () => {
+  await getAdminUser();
+
+  const usersCount = await db.profile.count();
+  const propertiesCount = await db.property.count();
+  const bookingsCount = await db.booking.count({
+    where: {
+      paymentStatus: true,
+    },
+  });
+
+  return {
+    usersCount,
+    propertiesCount,
+    bookingsCount,
+  };
+};
+
+export const fetchChartsData = async () => {
+  await getAdminUser();
+  const date = new Date();
+  date.setMonth(date.getMonth() - 6);
+  const sixMonthsAgo = date;
+
+  const bookings = await db.booking.findMany({
+    where: {
+      paymentStatus: true,
+      createdAt: {
+        gte: sixMonthsAgo,
+      },
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  });
+  const bookingsPerMonth = bookings.reduce((total, current) => {
+    const date = formatDate(current.createdAt, true);
+    const existingEntry = total.find((entry) => entry.date === date);
+    if (existingEntry) {
+      existingEntry.count += 1;
+    } else {
+      total.push({ date, count: 1 });
+    }
+    return total;
+  }, [] as Array<{ date: string; count: number }>);
+  return bookingsPerMonth;
+};
 
 export const fetchReservationStats = async () => {
   const user = await getAuthUser();
